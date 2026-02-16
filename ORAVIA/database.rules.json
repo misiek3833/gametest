@@ -1,0 +1,42 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    "users": {
+      "$uid": {
+        ".write": "$uid === auth.uid",
+        "username": { ".validate": "newData.isString() && newData.val().length < 20" }
+      }
+    },
+    "villages": {
+      ".indexOn": ["coords/x", "coords/y", "owner_id", "points"],
+      "$village_id": {
+        ".write": "auth != null && (!data.exists() || data.child('owner_id').val() === auth.uid)",
+        "owner_id": { ".validate": "newData.val() === auth.uid" },
+        "resources": {
+          "wood": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "stone": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "iron": { ".validate": "newData.isNumber() && newData.val() >= 0" }
+        }
+      }
+    },
+    "commands": {
+      ".indexOn": ["targetId", "arrivalTime"],
+      "$cmd_id": {
+        ".write": "auth != null && (!data.exists() || data.child('originId').val() === auth.val() || !data.child('originId').exists())",
+        ".validate": "newData.hasChildren(['targetId', 'units', 'arrivalTime', 'type'])"
+      }
+    },
+    "reports": {
+      "$uid": {
+        ".write": "auth != null",
+        ".read": "$uid === auth.uid"
+      }
+    },
+    "messages": {
+      "$uid": {
+        ".write": "auth != null",
+        ".read": "$uid === auth.uid"
+      }
+    }
+  }
+}
